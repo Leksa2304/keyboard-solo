@@ -1,4 +1,3 @@
-//const content = document.querySelector(".content");
 const wordContent = document.querySelector(".word");
 const сorrectWords = document.querySelector(".correct-count"); // правильно введенные слова
 const wrongWords = document.querySelector(".wrong-count"); // слова, введенные с ошибкой
@@ -33,7 +32,7 @@ function getword() { // функция генерации случайного �
         "радость"
     ];
 
-    index = Math.floor(Math.random() * words.length);
+    const index = Math.floor(Math.random() * words.length - 1);
     return words[index];
 }
 
@@ -42,15 +41,13 @@ function renderWord(el) { // рендеринг слова по <span>
     wordContent.innerHTML = el.split("").map((char) => `<span>${char}</span>`).join("");
 }
 
-
-
 let i = 0;
 let timerId;
-// let seconds = 0;
-// let minutes = 0;
+let seconds = 0;
+let minutes = 0;
 
 function startTimer() {
-    let [minutes, seconds] = timer.textContent.split(":").map(Number);
+
     seconds++;
 
     if (seconds === 59) {
@@ -77,14 +74,12 @@ function paintLetter(event) { //  функция окрашивания букв
 
     const spans = wordContent.querySelectorAll("span"); // spanы для каждой буквы
 
-    if (event.key === "Shift" || event.key === "Control" || event.key === "CapsLock") return; // не принимать за ошибку нажатие смены языка и капслок
-
-    if (event.key.toLowerCase() === spans[i].textContent) { // если нажата верная клавиша
+    if (event.key.toLowerCase() === word[i]) { // если нажата верная клавиша
         spans[i].className = "c";
         i++;
 
 
-        if (i === spans.length) { // ввели все слово
+        if (i === word.length) { // ввели все слово
 
             if (mistakes.textContent >= 1) { // если есть ошибки
                 wrongWords.textContent++; // добавить 1 к неправильным словам 
@@ -106,12 +101,12 @@ function paintLetter(event) { //  функция окрашивания букв
 }
 
 function nextWord() { // функция следующего слова
-    //проверка - не закончилась ли игра(написать функцию checkWordsCount)
+    //проверка - не закончилась ли игра
     checkWordsCount();
 
-    // рендерим новое слово
-
-    renderWord(getword());
+    // рендерим новое слово, перезаписав его в переменную word
+    word = getword();
+    renderWord(word);
 
     // обнуляем индекс
     i = 0;
@@ -120,23 +115,32 @@ function nextWord() { // функция следующего слова
 
 }
 
+function startNewGame() { //функция начала следующей игры, обнуление
+    minutes = 0;
+    seconds = 0;
+    timerId = setInterval(startTimer, 1000);
+    сorrectWords.textContent = 0;
+    wrongWords.textContent = 0;
+}
+
+
 function checkWordsCount() { // проверка на окончание игры
-    // Если количество неправильно введенных 5, то ....
+    // Если количество неправильно введенных 5
     if (wrongWords.textContent == 5) {
 
         clearTimeout(timerId);
         alert("Вы проиграли");
-        location.reload(); // перезагрузка страницы для начала новой игры
+        startNewGame() // начало новой игры
     }
 
-    // Если количество правильно введенных слов 5, то ....
+    // Если количество правильно введенных слов 5
     if (сorrectWords.textContent == 5) {
 
         clearTimeout(timerId);
         alert(`Победа. Ваше время: ${timer.textContent}`);
-        location.reload(); // перезагрузка страницы для начала новой игры
+        startNewGame() // начало новой игры
 
     }
 }
 
-document.addEventListener("keypress", paintLetter); // обработчик на нажатие клавиши
+document.addEventListener("keydown", paintLetter); // обработчик на нажатие клавиши
